@@ -2,19 +2,23 @@ package ro.pub.cs.systems.eim.Colocviu1_13;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class Colocviu1_13MainActivity extends AppCompatActivity {
 
     Button south, east, west, north;
+    Button button;
     TextView text;
     int buttonClicks;
 
     private ButtonClickListener buttonClickListener = new ButtonClickListener();
+    private NavListener navListener = new NavListener();
     private class ButtonClickListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
@@ -45,6 +49,37 @@ public class Colocviu1_13MainActivity extends AppCompatActivity {
         }
     }
 
+    private class NavListener implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            switch (view.getId()) {
+                case R.id.button:
+                    Intent intent = new Intent(getApplicationContext(), Colocviu1_13SecondaryActivity.class);
+                    intent.putExtra("str", text.getText().toString());
+                    startActivityForResult(intent, 3);
+                    buttonClicks = 0;
+                    text.setText("");
+                    break;
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (requestCode == 3) {
+            String s = "";
+            switch (resultCode) {
+                case 0:
+                    s = "Cancel";
+                    break;
+                case 1:
+                    s = "Register";
+            }
+            Toast.makeText(this, "toast message: " + s, Toast.LENGTH_LONG).show();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +98,9 @@ public class Colocviu1_13MainActivity extends AppCompatActivity {
         west.setOnClickListener(buttonClickListener);
         north.setOnClickListener(buttonClickListener);
 
+
+        button = findViewById(R.id.button);
+        button.setOnClickListener(navListener);
     }
 
     @Override
