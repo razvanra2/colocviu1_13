@@ -2,7 +2,10 @@ package ro.pub.cs.systems.eim.Colocviu1_13;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -19,6 +22,19 @@ public class Colocviu1_13MainActivity extends AppCompatActivity {
 
     private ButtonClickListener buttonClickListener = new ButtonClickListener();
     private NavListener navListener = new NavListener();
+
+    private IntentFilter intentFilter = new IntentFilter();
+
+    private MessageBroadcastReceiver messageBroadcastReceiver = new MessageBroadcastReceiver();
+    private class MessageBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("action", intent.getStringExtra("extra"));
+        }
+    }
+
+
+
     private class ButtonClickListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
@@ -44,6 +60,13 @@ public class Colocviu1_13MainActivity extends AppCompatActivity {
                     break;
             }
             buttonClicks += 1;
+
+            if (buttonClicks >= 4) {
+                Intent intent = new Intent(getApplicationContext(), Colocviu13_Service.class);
+                intent.putExtra("extra", textStr);
+                getApplicationContext().startService(intent);
+            }
+
             Log.d("incremented_tag", "buttonClicks is now: " + buttonClicks);
             text.setText(textStr);
         }
@@ -101,6 +124,8 @@ public class Colocviu1_13MainActivity extends AppCompatActivity {
 
         button = findViewById(R.id.button);
         button.setOnClickListener(navListener);
+
+        intentFilter.addAction("action");
     }
 
     @Override
@@ -113,5 +138,23 @@ public class Colocviu1_13MainActivity extends AppCompatActivity {
         if (savedInstanceState.containsKey("clicks")) {
             buttonClicks = savedInstanceState.getInt("clicks");
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        Intent intent = new Intent(this, Colocviu13_Service.class);
+        stopService(intent);
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(messageBroadcastReceiver, intentFilter);
+    }
+    @Override
+    protected void onPause() {
+        unregisterReceiver(messageBroadcastReceiver);
+        super.onPause();
     }
 }
